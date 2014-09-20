@@ -89,16 +89,16 @@ class Album(object):
         except:
             url = None
         return url
-        
+
     def get_cover_size(self):
-        'Get the album cover size'	
+        'Get the album cover size'
 	if self.library.true_file_size:
 	    r = urllib2.Request(self.get_cover_url())
 	    r.get_method = lambda: 'HEAD'
 	    u = urllib2.urlopen(r)
 	    return int(u.headers['Content-Length'])
 	return None
-	    
+
     def get_year(self):
         """Get the year of the album.
         Aggregate all the track years and pick the most popular year
@@ -183,7 +183,11 @@ class MusicLibrary(object):
         tracks = self.api.get_all_songs()
         for track in tracks:
             # Prefer the album artist over the track artist if there is one:
-            artist = formatNames(track['albumArtist'].lower())
+            try:
+              artist = formatNames(track['albumArtist'].lower())
+            except KeyError:
+              artist = ''
+
             if artist.strip() == '':
                 artist = formatNames(track['artist'].lower())
             # Get the Album object if it already exists:
@@ -337,7 +341,7 @@ class GMusicFS(LoggingMixIn, Operations):
             buf = u.read(size - ID3V1_TRAILER_SIZE) + id3v1
         else:
             buf = u.read(size)
-            
+
         try:
             u.bytes_read += size
         except AttributeError:
